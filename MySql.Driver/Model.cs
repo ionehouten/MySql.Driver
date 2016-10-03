@@ -28,7 +28,6 @@ namespace MySql.Driver
         protected void setView(string value)
         {
             this.View = View;
-            this.Sql.Table = value;
         }
         protected void setFields(string[] value)
         {
