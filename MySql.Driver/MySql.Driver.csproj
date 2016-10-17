@@ -71,6 +71,7 @@
       <HintPath>..\..\..\ASSEMBLY\MySqlBackup.NET 2.0.9.2\binaries\v4.5\MySqlBackup.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -85,9 +86,11 @@
     <Compile Include="DB\Data.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IModelType.cs" />
     <Compile Include="IModel.cs" />
     <Compile Include="InputParameters.cs" />
     <Compile Include="Messages.cs" />
+    <Compile Include="ModelType.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="DB\Config.cs" />

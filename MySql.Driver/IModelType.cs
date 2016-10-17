@@ -3,7 +3,7 @@ using System.Data;
 
 namespace MySql.Driver
 {
-    public interface IModel 
+    public interface IModelType
     {
         MySql.Driver.DB.Driver Driver { get; set; }
         DataTable DataTable { get; set; }

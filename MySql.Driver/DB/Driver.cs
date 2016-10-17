@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using MySql.Data.MySqlClient;
+using System.Collections;
 
 namespace MySql.Driver.DB
 {
@@ -136,6 +137,7 @@ namespace MySql.Driver.DB
         {
             try
             {
+
                 DataTable = new DataTable();
                 if (OpenConnection() == true)
                 {
@@ -160,7 +162,7 @@ namespace MySql.Driver.DB
                 throw;
             }
            
-        }
+        }   
 
         public int Count(string sql)
         {
