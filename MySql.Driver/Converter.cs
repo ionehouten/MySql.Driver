@@ -17,6 +17,8 @@ using MySql.Driver.DB;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
 using System.Collections;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace MySql.Driver
 {
@@ -1348,26 +1350,6 @@ namespace MySql.Driver
 
     public static class DataFiller
     {
-        public static DataTable ConvertTo<T>(IList<T> list)
-        {
-            DataTable table = CreateTable<T>();
-            Type entityType = typeof(T);
-            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(entityType);
-
-            foreach (T item in list)
-            {
-                DataRow row = table.NewRow();
-
-                foreach (PropertyDescriptor prop in properties)
-                {
-                    row[prop.Name] = prop.GetValue(item);
-                }
-
-                table.Rows.Add(row);
-            }
-
-            return table;
-        }
         public static IList<T> ConvertTo<T>(IList<DataRow> rows)
         {
             IList<T> list = null;
@@ -1496,6 +1478,17 @@ namespace MySql.Driver
             }
 
             return DateTime.MinValue;
+        }
+        public static Object GetInstance(Type type)
+        {
+            return Activator.CreateInstance(type);
+        }
+        public static IList GetInstanceList(Type type)
+        {
+            var listType = typeof(List<>);
+            var constructedListType = listType.MakeGenericType(type);
+
+            return (IList)Activator.CreateInstance(constructedListType);
         }
         public static List<T> ToList<T>(this DataTable dataTable) where T : new()
         {
@@ -1628,18 +1621,6 @@ namespace MySql.Driver
             }
             return dataList;
         }
-
-        public static Object GetInstance(Type type)
-        {
-            return Activator.CreateInstance(type);
-        }
-        public static IList GetInstanceList(Type type)
-        {
-            var listType = typeof(List<>);
-            var constructedListType = listType.MakeGenericType(type);
-
-            return (IList)Activator.CreateInstance(constructedListType);
-        }
         public static IList ToList(this DataTable dataTable, Type type) 
         {
             var dataList = GetInstanceList(type);
@@ -1771,125 +1752,156 @@ namespace MySql.Driver
             }
             return dataList;
         }
-
-        public static Object ToListClass<T>(this DataTable dataTable) where T : new()
+        public static IList ToList(this DataTable dataTable, Type type, BindingSource binding, UserControl ctrl)
         {
-            List<T> dataList = new List<T>();
-
-            //Define what attributes to be read from the class
-            const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
-
-            //Read Attribute Names and Types
-            var objFieldNames = typeof(T).GetProperties(flags).Cast<PropertyInfo>().
-                Select(item => new
-                {
-                    Name = item.Name,
-                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
-                }).ToList();
-
-            //Read Datatable column names and types
-            var dtlFieldNames = dataTable.Columns.Cast<DataColumn>().
-                Select(item => new {
-                    Name = item.ColumnName,
-                    Type = item.DataType
-                }).ToList();
-            var i = 1;
-            foreach (DataRow dataRow in dataTable.AsEnumerable().ToList())
+            var dataList = MySql.Driver.DataFiller.GetInstanceList(type);
+            try
             {
-                var classObj = new T();
-                PropertyInfo propertyNo = classObj.GetType().GetProperty("NO");
-                if (propertyNo != null)
+                ctrl.Invoke((MethodInvoker)delegate
                 {
-                    propertyNo.SetValue(classObj, i, null);
-                }
-                i++;
-                foreach (var dtField in dtlFieldNames)
-                {
-                    try
+                    binding.DataSource = dataList;
+                });
+
+                //Define what attributes to be read from the class
+                const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+
+                //Read Attribute Names and Types
+                var objFieldNames = type.GetProperties(flags).Cast<PropertyInfo>().
+                    Select(item => new
                     {
-                        PropertyInfo propertyInfos = classObj.GetType().GetProperty(dtField.Name);
+                        Name = item.Name,
+                        Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
+                    }).ToList();
 
-                        var field = objFieldNames.Find(x => x.Name == dtField.Name);
+                //Read Datatable column names and types
+                var dtlFieldNames = dataTable.Columns.Cast<DataColumn>().
+                    Select(item => new {
+                        Name = item.ColumnName,
+                        Type = item.DataType
+                    }).ToList();
+                var i = 1;
+                foreach (DataRow dataRow in dataTable.AsEnumerable().ToList())
+                {
 
-                        if (field != null)
+                    var classObj = MySql.Driver.DataFiller.GetInstance(type);
+                    PropertyInfo propertyNo = classObj.GetType().GetProperty("NO");
+                    if (propertyNo != null)
+                    {
+                        propertyNo.SetValue(classObj, i, null);
+                    }
+                    i++;
+                    foreach (var dtField in dtlFieldNames)
+                    {
+                        try
                         {
+                            PropertyInfo propertyInfos = classObj.GetType().GetProperty(dtField.Name.ToUpper());
 
-                            if (propertyInfos.PropertyType == typeof(DateTime) || propertyInfos.PropertyType == typeof(DateTime?))
+                            var field = objFieldNames.Find(x => x.Name.ToUpper() == dtField.Name.ToUpper());
+
+                            if (field != null)
                             {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDateTime(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int16) || propertyInfos.PropertyType == typeof(UInt16))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt16(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int16?) || propertyInfos.PropertyType == typeof(UInt16?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt16Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int32) || propertyInfos.PropertyType == typeof(UInt32))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt32(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int32?) || propertyInfos.PropertyType == typeof(UInt32?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt32Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int64) || propertyInfos.PropertyType == typeof(UInt64))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt64(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int64?) || propertyInfos.PropertyType == typeof(UInt64?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt64Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Decimal) || propertyInfos.PropertyType == typeof(Decimal?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Double))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDouble(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Double?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDoubleNull(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(float) || propertyInfos.PropertyType == typeof(float?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(String))
-                            {
-                                if (dataRow[dtField.Name].GetType() == typeof(DateTime))
+
+                                if (propertyInfos.PropertyType == typeof(DateTime) || propertyInfos.PropertyType == typeof(DateTime?))
                                 {
                                     propertyInfos.SetValue
-                                    (classObj, Converter.formatDate(dataRow[dtField.Name]), null);
+                                    (classObj, Converter.toDateTime(dataRow[dtField.Name]), null);
                                 }
-                                else
+                                else if (propertyInfos.PropertyType == typeof(Int16) || propertyInfos.PropertyType == typeof(UInt16))
                                 {
                                     propertyInfos.SetValue
-                                    (classObj, Converter.toString(dataRow[dtField.Name]), null);
+                                    (classObj, Converter.toInt16(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Int16?) || propertyInfos.PropertyType == typeof(UInt16?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toInt16Null(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Int32) || propertyInfos.PropertyType == typeof(UInt32))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toInt32(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Int32?) || propertyInfos.PropertyType == typeof(UInt32?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toInt32Null(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Int64) || propertyInfos.PropertyType == typeof(UInt64))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toInt64(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Int64?) || propertyInfos.PropertyType == typeof(UInt64?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toInt64Null(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Decimal))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Decimal?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Double))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDouble(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Double?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDoubleNull(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(float))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(float?))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(String))
+                                {
+                                    if (dataRow[dtField.Name].GetType() == typeof(DateTime))
+                                    {
+                                        propertyInfos.SetValue
+                                        (classObj, Converter.formatDate(dataRow[dtField.Name]), null);
+                                    }
+                                    else
+                                    {
+                                        propertyInfos.SetValue
+                                        (classObj, Converter.toString(dataRow[dtField.Name]), null);
+                                    }
                                 }
                             }
                         }
+                        catch
+                        {
+                            continue;
+                        }
                     }
-                    catch
+                    if (ctrl.IsDisposed == true)
                     {
-                        continue;
+                        break;
                     }
+                    ctrl.Invoke(
+                         new Action(() =>
+                         {
+                             binding.Add(classObj);
+                         }
+                     ));
+
                 }
-                dataList.Add(classObj);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             return dataList;
         }
@@ -1902,6 +1914,45 @@ namespace MySql.Driver
 
             //Read Attribute Names and Types
             var objFieldNames = typeof(T).GetProperties(flags).Cast<PropertyInfo>().
+                Select(item => new
+                {
+                    Name = item.Name,
+                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
+                }).ToList();
+
+            var objFieldEntity = typeof(Entity).GetProperties(flags).Cast<PropertyInfo>().
+                Select(item => new
+                {
+                    Name = item.Name,
+                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
+                }).ToList();
+
+            foreach (var item in objFieldNames)
+            {
+                var itemEntity = objFieldEntity.Where(x => x.Name == item.Name).FirstOrDefault();
+                if (itemEntity == null)
+                {
+                    PropertyInfo propertyInfos = entity.GetType().GetProperty(item.Name);
+
+                    MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
+                    parameter.FIELD = item.Name;
+                    parameter.VALUE = propertyInfos.GetValue(entity);
+                    parameters.Add(parameter);
+                }
+
+            }
+
+            return parameters;
+        }
+        public static List<MySql.Driver.DB.Parameters> ToParamMySql(this Entity entity, Type type) 
+        {
+            List<MySql.Driver.DB.Parameters> parameters = new List<MySql.Driver.DB.Parameters>();
+
+            //Define what attributes to be read from the class
+            const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+
+            //Read Attribute Names and Types
+            var objFieldNames = type.GetProperties(flags).Cast<PropertyInfo>().
                 Select(item => new
                 {
                     Name = item.Name,
@@ -2049,14 +2100,13 @@ namespace MySql.Driver
 
             catch (MySqlException e)
             {
-                output.DATA = listData;
+                output.DATA = null;
                 output.RESULT = "N";
                 output.MESSAGE = e.Message;
                 Exceptions.MySql(e);
             }
             return output;
         }
-
         public static OutputParameters Find(this MySql.Driver.DB.Driver driver, String sql, Type type) 
         {
             OutputParameters output = new OutputParameters();
@@ -2086,14 +2136,13 @@ namespace MySql.Driver
 
             catch (MySqlException e)
             {
-                output.DATA = listData;
+                output.DATA = null;
                 output.RESULT = "N";
                 output.MESSAGE = e.Message;
                 Exceptions.MySql(e);
             }
             return output;
         }
-
         public static String GetCondition(this Entity instance)
         {
             string output = "";
@@ -2134,7 +2183,102 @@ namespace MySql.Driver
 
             return output;
         }
+        //public static String SetPrimaryKey(this Entity instance, object key)
+        //{
+        //    string output = "";
+        //    PropertyInfo[] properties = instance.GetType().GetProperties();
+        //    List<MySql.Driver.DB.Parameters> param = new List<MySql.Driver.DB.Parameters>();
+        //    foreach (PropertyInfo row in properties)
+        //    {
+        //        foreach (CustomAttributeData item in row.CustomAttributes)
+        //        {
+        //            if (item.AttributeType.Name == "KeyAttribute")
+        //            {
+        //                if (row.PropertyType == typeof(Int16))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt16(key), null);
+        //                }
+        //                else if (row.PropertyType == typeof(Int32))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt32(key), null);
+        //                }
+        //                else if (row.PropertyType == typeof(Int64))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt64(key), null);
+        //                }
+        //                else if (row.PropertyType == typeof(Int16?))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt16Null(key), null);
+        //                }
+        //                else if (row.PropertyType == typeof(Int32?))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt32Null(key), null);
+        //                }
+        //                else if (row.PropertyType == typeof(Int64?))
+        //                {
+        //                    row.SetValue(instance, Converter.toInt64Null(key), null);
+        //                }
+        //                else
+        //                {
 
+        //                }
+                        
+        //                break;
+        //            }
+        //        }
+        //    }
+            
+
+        //    return output;
+        //}
+        public static String SetPrimaryKey(this Entity instance, object key)
+        {
+            string output = "";
+            PropertyInfo[] properties = instance.GetType().GetProperties();
+            List<MySql.Driver.DB.Parameters> param = new List<MySql.Driver.DB.Parameters>();
+            foreach (PropertyInfo row in properties)
+            {
+                foreach (CustomAttributeData item in row.CustomAttributes)
+                {
+                    if (item.AttributeType.Name == "DatabaseGeneratedAttribute")
+                    {
+                        if (row.PropertyType == typeof(Int16))
+                        {
+                            row.SetValue(instance, Converter.toInt16(key), null);
+                        }
+                        else if (row.PropertyType == typeof(Int32))
+                        {
+                            row.SetValue(instance, Converter.toInt32(key), null);
+                        }
+                        else if (row.PropertyType == typeof(Int64))
+                        {
+                            row.SetValue(instance, Converter.toInt64(key), null);
+                        }
+                        else if (row.PropertyType == typeof(Int16?))
+                        {
+                            row.SetValue(instance, Converter.toInt16Null(key), null);
+                        }
+                        else if (row.PropertyType == typeof(Int32?))
+                        {
+                            row.SetValue(instance, Converter.toInt32Null(key), null);
+                        }
+                        else if (row.PropertyType == typeof(Int64?))
+                        {
+                            row.SetValue(instance, Converter.toInt64Null(key), null);
+                        }
+                        else
+                        {
+
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+
+            return output;
+        }
         public static T GetAttributeFrom<T>(this object instance, string propertyName) where T : Attribute
         {
             var attrType = typeof(T);

@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MySql.Driver
 {
     public class OutputParameters
     {
-        public object DATA { get; set; }
-        public string RESULT { get; set; }
-        public string MESSAGE { get; set; }
+        public Object DATA { get; set; }
+        public String RESULT { get; set; }
+        public String MESSAGE { get; set; }
+        public Int64? ID { get; set; }
     }
 }

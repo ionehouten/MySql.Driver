@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MySql.Driver
 {
@@ -18,7 +20,7 @@ namespace MySql.Driver
         public string Table { get; set; }
         public string View { get; set; }
 
-        protected Type Entity;
+        public Type Entity;
         
         public Model()
         {
@@ -58,6 +60,54 @@ namespace MySql.Driver
 
             return output;
         }
+        public virtual OutputParameters GetData(String query)
+        {
+            OutputParameters output = new OutputParameters();
+            Driver = new MySql.Driver.DB.Driver();
+            output = Driver.Find(query, Entity);
+
+            return output;
+        }
+
+        public virtual OutputParameters GetData(InputParameters input, BindingSource binding, UserControl ctrl)
+        {
+            OutputParameters output = new OutputParameters();
+            Sql.Condition = input.CONDITION;
+            Sql.Order = input.ORDER;
+            Sql.Limit = input.LIMIT;
+            Sql.Offset = input.OFFSET;
+            var select = Sql.select();
+            Driver = new MySql.Driver.DB.Driver();
+            DataTable = Driver.Find(select);
+            GetDataAsync(binding, ctrl);
+            return output;
+        }
+
+        public virtual async void GetDataAsync(BindingSource binding, UserControl ctrl)
+        {
+            try
+            {
+                await Task.Run(() => DataTable.ToList(this.Entity, binding, ctrl));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public virtual DataTable GetDataTable(InputParameters input)
+        {
+            DataTable = new DataTable();
+            Sql.Condition = input.CONDITION;
+            Sql.Order = input.ORDER;
+            Sql.Limit = input.LIMIT;
+            Sql.Offset = input.OFFSET;
+            var select = Sql.select();
+            Driver = new MySql.Driver.DB.Driver();
+            DataTable = Driver.Find(select);
+
+            return DataTable;
+        }
 
         public virtual OutputParameters Execute(object input)
         {
@@ -85,7 +135,17 @@ namespace MySql.Driver
                             break;
                     }
                     Driver = new MySql.Driver.DB.Driver();
-                    output = Driver.Cmd(Command);
+                    output = Driver.Cmd(Command, Operation.Create);
+                    if (output.ID != null)
+                    {
+                        (input as Entity).SetPrimaryKey(output.ID);
+                    }
+                    if(data.OPERATION == Operation.Create && output.RESULT == "Y")
+                    {
+                        data.OPERATION = Operation.Update;
+                        data.NO = -1;
+                    }
+                    output.DATA = data;
 
                 }
                 else
@@ -97,6 +157,7 @@ namespace MySql.Driver
             catch (Exception e)
             {
                 Exceptions.Db(e, this.Table);
+                output.MESSAGE = e.Message;
             }
             return output;
         }
@@ -109,6 +170,20 @@ namespace MySql.Driver
                 Sql.Condition = input.CONDITION;
                 var query = Sql.count();
 
+                Driver = new MySql.Driver.DB.Driver();
+                TotalData = Driver.Count(query);
+            }
+            catch (Exception e)
+            {
+                Exceptions.Db(e, this.Table);
+            }
+            return TotalData;
+        }
+        public virtual Int32 CountData(String query)
+        {
+            TotalData = 0;
+            try
+            {
                 Driver = new MySql.Driver.DB.Driver();
                 TotalData = Driver.Count(query);
             }

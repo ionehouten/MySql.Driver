@@ -196,7 +196,7 @@ namespace MySql.Driver.DB
             {
                 var result = string.Empty;
                 var message = string.Empty;
-
+                Int64? id = null;
 
                 switch (mode)
                 {
@@ -219,6 +219,7 @@ namespace MySql.Driver.DB
                         case "C":
                             result = "Y";
                             message = Command.ExecuteScalar().ToString();
+                            id = Converter.toInt64Null(message);
                             break;
                         case "U":
                         case "D":
@@ -241,6 +242,7 @@ namespace MySql.Driver.DB
                 }
                 Output.RESULT = result;
                 Output.MESSAGE = message;
+                Output.ID = id;
             }
             catch (MySqlException e)
             {
@@ -251,11 +253,12 @@ namespace MySql.Driver.DB
             return Output;
         }
 
-        public OutputParameters Cmd(MySqlCommand Command)
+        public OutputParameters Cmd(MySqlCommand Command, Operation operation)
         {
             OutputParameters Output = new OutputParameters();
 
             var message = string.Empty;
+            Int64? id = null;
             try
             {
                 if (OpenConnection() == true)
@@ -270,12 +273,21 @@ namespace MySql.Driver.DB
 
                         try
                         {
+                            if(operation == Operation.Create)
+                            {
+                                this.Command.CommandText += " SELECT last_insert_id();";
+                                message = this.Command.ExecuteScalar().ToString();
+                                id = Converter.toInt64Null(message);
+                            }
+                            else
+                            {
+                                this.Command.ExecuteNonQuery();
+                            }
 
-                            this.Command.ExecuteNonQuery();
-                            
                             Transaction.Commit();
                             Output.RESULT = "Y";
-                            Output.MESSAGE = "";
+                            Output.MESSAGE = Converter.toString(message);
+                            Output.ID = id;
                         }
                         catch (MySqlException e)
                         {
