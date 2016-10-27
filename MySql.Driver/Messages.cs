@@ -4,12 +4,12 @@
     {
   
         public Messages(){}
-        public static string InsertSucceed = "Data Berhasil Di Simpan";
-        public static string InsertFailed = "Data Gagal Di Simpan";
-        public static string UpdateSucceed = "Data Berhasil Di Simpan";
-        public static string UpdateFailed = "Data Gagal Di Simpan";
-        public static string DeleteSucceed = "Data Berhasil Di Hapus";
-        public static string DeteteFailed = "Data Gagal Di Hapus";
+        public static string InsertSucceed = "Data successfully added";
+        public static string InsertFailed = "Data could not be added";
+        public static string UpdateSucceed = "Data successfully saved";
+        public static string UpdateFailed = "Data could not be saved";
+        public static string DeleteSucceed = "Data successfully deleted";
+        public static string DeteteFailed = "Data could not be deleted";
 
     }
 }

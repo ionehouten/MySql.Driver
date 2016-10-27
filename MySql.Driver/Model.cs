@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -69,8 +70,9 @@ namespace MySql.Driver
             return output;
         }
 
-        public virtual OutputParameters GetData(InputParameters input, BindingSource binding, UserControl ctrl)
+        public virtual OutputParameters GetData(InputParameters input, BindingSource binding, Control ctrl)
         {
+            
             OutputParameters output = new OutputParameters();
             Sql.Condition = input.CONDITION;
             Sql.Order = input.ORDER;
@@ -83,10 +85,11 @@ namespace MySql.Driver
             return output;
         }
 
-        public virtual async void GetDataAsync(BindingSource binding, UserControl ctrl)
+        public virtual async void GetDataAsync(BindingSource binding, Control ctrl)
         {
             try
             {
+                Thread.Sleep(100);
                 await Task.Run(() => DataTable.ToList(this.Entity, binding, ctrl));
             }
             catch(Exception ex)

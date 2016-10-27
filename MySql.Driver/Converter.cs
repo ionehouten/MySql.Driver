@@ -630,6 +630,8 @@ namespace MySql.Driver
             return output;
             
         }
+
+      
         public static byte[] toByteArray(string input)
         {
             byte[] output;
@@ -1346,6 +1348,62 @@ namespace MySql.Driver
 
             
         }
+        public static MySqlDbType getMySqlDbTtype(object input)
+        {
+            string type = input.GetType().ToString();
+            MySqlDbType output = MySqlDbType.String;
+
+            switch (type)
+            {
+                case "System.String":
+                    output = MySqlDbType.String;
+                    break;
+                case "System.Byte":
+                    output = MySqlDbType.Byte;
+                    break;
+                case "System.Byte[]":
+                case "System.Drawing.Bitmap":
+                    output = MySqlDbType.Blob;
+                    break;
+                case "System.DateTime":
+                    output = MySqlDbType.DateTime;
+                    break;
+                case "System.TimeSpan":
+                    output = MySqlDbType.DateTime;
+                    break;
+                case "System.DBNull":
+                    output = MySqlDbType.String;
+                    break;
+                case "System.Function":
+                    output = MySqlDbType.String;
+                    break;
+                case "System.Decimal":
+                    output = MySqlDbType.Decimal;
+                    break;
+                case "System.Int16":
+                    output = MySqlDbType.Int16;
+                    break;
+                case "System.Int24":
+                    output = MySqlDbType.Int24;
+                    break;
+                case "System.Int32":
+                    output = MySqlDbType.Int32;
+                    break;
+                case "System.Int64":
+                    output = MySqlDbType.Int64;
+                    break;
+                case "System.Double":
+                    output = MySqlDbType.Double;
+                    break;
+                default:
+                    output = MySqlDbType.String;
+                    break;
+            }
+
+
+            return output;
+        }
+
     }
 
     public static class DataFiller
@@ -1531,85 +1589,86 @@ namespace MySql.Driver
 
                         if (field != null)
                         {
+                            propertyInfos.SetValue(classObj, dataRow[dtField.Name], null);
 
-                            if (propertyInfos.PropertyType == typeof(DateTime) || propertyInfos.PropertyType == typeof(DateTime?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDateTime(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int16) || propertyInfos.PropertyType == typeof(UInt16))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt16(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int16?) || propertyInfos.PropertyType == typeof(UInt16?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt16Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int32) || propertyInfos.PropertyType == typeof(UInt32))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt32(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int32?) || propertyInfos.PropertyType == typeof(UInt32?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt32Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int64) || propertyInfos.PropertyType == typeof(UInt64))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt64(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Int64?) || propertyInfos.PropertyType == typeof(UInt64?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toInt64Null(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Decimal))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Decimal?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Double))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDouble(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(Double?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDoubleNull(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(float))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(float?))
-                            {
-                                propertyInfos.SetValue
-                                (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
-                            }
-                            else if (propertyInfos.PropertyType == typeof(String))
-                            {
-                                if (dataRow[dtField.Name].GetType() == typeof(DateTime))
-                                {
-                                    propertyInfos.SetValue
-                                    (classObj, Converter.formatDate(dataRow[dtField.Name]), null);
-                                }
-                                else
-                                {
-                                    propertyInfos.SetValue
-                                    (classObj, Converter.toString(dataRow[dtField.Name]), null);
-                                }
-                            }
+                            //if (propertyInfos.PropertyType == typeof(DateTime) || propertyInfos.PropertyType == typeof(DateTime?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDateTime(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int16) || propertyInfos.PropertyType == typeof(UInt16))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt16(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int16?) || propertyInfos.PropertyType == typeof(UInt16?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt16Null(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int32) || propertyInfos.PropertyType == typeof(UInt32))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt32(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int32?) || propertyInfos.PropertyType == typeof(UInt32?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt32Null(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int64) || propertyInfos.PropertyType == typeof(UInt64))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt64(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Int64?) || propertyInfos.PropertyType == typeof(UInt64?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toInt64Null(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Decimal))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Decimal?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Double))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDouble(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(Double?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDoubleNull(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(float))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDecimal(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(float?))
+                            //{
+                            //    propertyInfos.SetValue
+                            //    (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
+                            //}
+                            //else if (propertyInfos.PropertyType == typeof(String))
+                            //{
+                            //    if (dataRow[dtField.Name].GetType() == typeof(DateTime))
+                            //    {
+                            //        propertyInfos.SetValue
+                            //        (classObj, Converter.formatDate(dataRow[dtField.Name]), null);
+                            //    }
+                            //    else
+                            //    {
+                            //        propertyInfos.SetValue
+                            //        (classObj, Converter.toString(dataRow[dtField.Name]), null);
+                            //    }
+                            //}
                         }
                     }
                     catch
@@ -1728,6 +1787,21 @@ namespace MySql.Driver
                                 propertyInfos.SetValue
                                 (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
                             }
+                            else if (propertyInfos.PropertyType == typeof(byte))
+                            {
+                                propertyInfos.SetValue
+                                (classObj, Converter.toByte(dataRow[dtField.Name]), null);
+                            }
+                            else if (propertyInfos.PropertyType == typeof(Image))
+                            {
+                                propertyInfos.SetValue
+                                (classObj, Converter.toImage(dataRow[dtField.Name]), null);
+                            }
+                            else if (propertyInfos.PropertyType == typeof(byte[]))
+                            {
+                                propertyInfos.SetValue
+                                (classObj, Converter.toByteArray(dataRow[dtField.Name]), null);
+                            }
                             else if (propertyInfos.PropertyType == typeof(String))
                             {
                                 if (dataRow[dtField.Name].GetType() == typeof(DateTime))
@@ -1752,16 +1826,22 @@ namespace MySql.Driver
             }
             return dataList;
         }
-        public static IList ToList(this DataTable dataTable, Type type, BindingSource binding, UserControl ctrl)
+        public static IList ToList(this DataTable dataTable, Type type, BindingSource binding, Control ctrl)
         {
             var dataList = MySql.Driver.DataFiller.GetInstanceList(type);
             try
             {
+                //ctrl.Invoke(
+                //        new Action(() =>
+                //        {
+                //            binding.DataSource = dataList;
+                //        }
+                //    ));
+
                 ctrl.Invoke((MethodInvoker)delegate
                 {
                     binding.DataSource = dataList;
                 });
-
                 //Define what attributes to be read from the class
                 const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
 
@@ -1866,6 +1946,21 @@ namespace MySql.Driver
                                     propertyInfos.SetValue
                                     (classObj, Converter.toDecimalNull(dataRow[dtField.Name]), null);
                                 }
+                                else if (propertyInfos.PropertyType == typeof(byte))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toByte(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(Image))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toImage(dataRow[dtField.Name]), null);
+                                }
+                                else if (propertyInfos.PropertyType == typeof(byte[]))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toByteArray(dataRow[dtField.Name]), null);
+                                }
                                 else if (propertyInfos.PropertyType == typeof(String))
                                 {
                                     if (dataRow[dtField.Name].GetType() == typeof(DateTime))
@@ -1890,12 +1985,17 @@ namespace MySql.Driver
                     {
                         break;
                     }
-                    ctrl.Invoke(
-                         new Action(() =>
-                         {
-                             binding.Add(classObj);
-                         }
-                     ));
+
+                    //ctrl.Invoke(
+                    //     new Action(() =>
+                    //     {
+                    //         binding.Add(classObj);
+                    //     }
+                    // ));
+                    ctrl.Invoke((MethodInvoker)delegate
+                    {
+                        binding.Add(classObj);
+                    });
 
                 }
             }
@@ -2016,7 +2116,17 @@ namespace MySql.Driver
                     {
                         MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
                         parameter.FIELD = item.Name;
-                        parameter.VALUE = propertyInfos.GetValue(entity);
+                        parameter.TYPE = Converter.getMySqlDbTtype(propertyInfos.GetValue(entity));
+                        if (propertyInfos.PropertyType == typeof(Image))
+                        {
+                            parameter.VALUE = Converter.toByteArray(propertyInfos.GetValue(entity) as Image);
+                        }
+                        else
+                        {
+                            parameter.VALUE = propertyInfos.GetValue(entity);
+                        }
+
+
                         parameters.Add(parameter);
                     }
 
@@ -2060,7 +2170,17 @@ namespace MySql.Driver
                     {
                         MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
                         parameter.FIELD = item.Name;
-                        parameter.VALUE = propertyInfos.GetValue(entity);
+                        parameter.TYPE = Converter.getMySqlDbTtype(propertyInfos.GetValue(entity));
+                        if (propertyInfos.PropertyType == typeof(Image))
+                        {
+                            parameter.VALUE = Converter.toByteArray(propertyInfos.GetValue(entity) as Image);
+                        }
+                        else
+                        {
+                            parameter.VALUE = propertyInfos.GetValue(entity);
+                        }
+                        
+                        
                         parameters.Add(parameter);
                     }
 

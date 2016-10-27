@@ -12,7 +12,7 @@
          <Members>
           <Member Name="#Cmd(MySql.Data.MySqlClient.MySqlCommand,MySql.Driver.Operation)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2016-10-19 09:11:39Z" FixCategory="DependsOnFix">
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2016-10-27 08:34:17Z" FixCategory="DependsOnFix">
              <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\PROJECT\C#\DRIVER\MySql.Driver\MySql.Driver\DB" File="Driver.cs" Line="278">The query string passed to 'MySqlCommand.CommandText.set(string)' in 'Driver.Cmd(MySqlCommand, Operation)' could contain the following variables 'this.Command.CommandText'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
             </Message>
            </Messages>
