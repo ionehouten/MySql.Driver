@@ -11,7 +11,7 @@ namespace MySql.Driver.DB
     /// <summary>
     /// 
     /// </summary>
-    public class Driver : Config
+    public class Driver 
     {
         private MySqlConnection Conn = null;
         private MySqlDataAdapter Adapter = null;
@@ -65,7 +65,6 @@ namespace MySql.Driver.DB
                 this.MySql.DefaultCommandTimeout = 60000;
                 this.MySql.UseDefaultCommandTimeoutForEF = true;
                 this.MySql.AllowZeroDateTime = true;
-                
                 //this.MySql.ConvertZeroDateTime = true;
                 Conn = new MySqlConnection(this.MySql.ConnectionString);
             }
@@ -445,7 +444,7 @@ namespace MySql.Driver.DB
             return Output;
         }
 
-        public OutputParameters Export(string filepath, bool createdatabase, bool tablestructure, bool rows, bool views, bool triggers, bool functions, bool procedures)
+        public OutputParameters Export(string filepath, bool createdatabase, bool tablestructure, bool rows, bool views, bool triggers, bool functions, bool procedures,List<string> listTable = null)
         {
             OutputParameters Output = new OutputParameters();
             Output.MESSAGE = "";
@@ -471,6 +470,8 @@ namespace MySql.Driver.DB
                             Backup.ExportInfo.ExportTriggers = triggers;
                             Backup.ExportInfo.ExportFunctions = functions;
                             Backup.ExportInfo.ExportProcedures = procedures;
+                            Backup.ExportInfo.ResetAutoIncrement = true;
+                            Backup.ExportInfo.TablesToBeExportedList = listTable;
                             Backup.ExportToFile(filepath);
 
                         }

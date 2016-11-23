@@ -24,6 +24,6 @@ namespace MySql.Driver
         Detail = 4,
         Disable = 5,
         Cancel = 6,
-        Revision = 6,
+        Revision = 7,
     }
 }

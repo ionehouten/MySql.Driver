@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="c:\program files (x86)\microsoft visual studio 14.0\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
 <FxCopReport Version="14.0">
  <Targets>
-  <Target Name="D:\PROJECT\C#\DRIVER\MySql.Driver\MySql.Driver\bin\Release\MySql.Driver.dll">
+  <Target Name="D:\PROJECT\C Sharp\DRIVER\MySql.Driver\MySql.Driver\bin\Release\MySql.Driver.dll">
    <Modules>
     <Module Name="mysql.driver.dll">
      <Namespaces>
@@ -12,8 +12,8 @@
          <Members>
           <Member Name="#Cmd(MySql.Data.MySqlClient.MySqlCommand,MySql.Driver.Operation)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2016-10-27 08:34:17Z" FixCategory="DependsOnFix">
-             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\PROJECT\C#\DRIVER\MySql.Driver\MySql.Driver\DB" File="Driver.cs" Line="278">The query string passed to 'MySqlCommand.CommandText.set(string)' in 'Driver.Cmd(MySqlCommand, Operation)' could contain the following variables 'this.Command.CommandText'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
+            <Message TypeName="Review SQL queries for security vulnerabilities" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2016-11-23 03:09:01Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="D:\PROJECT\C Sharp\DRIVER\MySql.Driver\MySql.Driver\DB" File="Driver.cs" Line="277">The query string passed to 'MySqlCommand.CommandText.set(string)' in 'Driver.Cmd(MySqlCommand, Operation)' could contain the following variables 'this.Command.CommandText'. If any of these variables could come from user input, consider using a stored procedure or a parameterized SQL query instead of building the query with string concatenations.</Issue>
             </Message>
            </Messages>
           </Member>
