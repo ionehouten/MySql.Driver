@@ -13,6 +13,7 @@ namespace MySql.Driver
 
     public abstract class Model : IModel
     {
+        public String Profile { get; set; }
         public MySql.Driver.DB.Driver Driver { get; set; }
         public DataTable DataTable { get; set; }
         public DataTable DataDetail { get; set; }
@@ -23,9 +24,10 @@ namespace MySql.Driver
 
         public Type Entity;
         
-        public Model()
+        public Model(String Profile = "DEFAULT")
         {
             Sql = new Sql();
+            this.Profile = Profile;
             this.setFields(new string[] { "*" });
         }
         protected void setTable(string value)
@@ -56,7 +58,7 @@ namespace MySql.Driver
             Sql.Limit = input.LIMIT;
             Sql.Offset = input.OFFSET;
             var select = Sql.select();
-            Driver = new MySql.Driver.DB.Driver();
+            Driver = new MySql.Driver.DB.Driver(Profile);
             output = Driver.Find(select,Entity);
 
             return output;
@@ -64,7 +66,7 @@ namespace MySql.Driver
         public virtual OutputParameters GetData(String query)
         {
             OutputParameters output = new OutputParameters();
-            Driver = new MySql.Driver.DB.Driver();
+            Driver = new MySql.Driver.DB.Driver(Profile);
             output = Driver.Find(query, Entity);
 
             return output;
@@ -79,7 +81,7 @@ namespace MySql.Driver
             Sql.Limit = input.LIMIT;
             Sql.Offset = input.OFFSET;
             var select = Sql.select();
-            Driver = new MySql.Driver.DB.Driver();
+            Driver = new MySql.Driver.DB.Driver(Profile);
             DataTable = Driver.Find(select);
             GetDataAsync(binding, ctrl);
             return output;
@@ -106,7 +108,7 @@ namespace MySql.Driver
             Sql.Limit = input.LIMIT;
             Sql.Offset = input.OFFSET;
             var select = Sql.select();
-            Driver = new MySql.Driver.DB.Driver();
+            Driver = new MySql.Driver.DB.Driver(Profile);
             DataTable = Driver.Find(select);
 
             return DataTable;
@@ -137,7 +139,7 @@ namespace MySql.Driver
                             Command = Sql.deleteCmd();
                             break;
                     }
-                    Driver = new MySql.Driver.DB.Driver();
+                    Driver = new MySql.Driver.DB.Driver(Profile);
                     output = Driver.Cmd(Command, Operation.Create);
                     if (output.ID != null)
                     {
@@ -165,6 +167,39 @@ namespace MySql.Driver
             return output;
         }
 
+        public virtual String GetQuery(object input, string condition = "")
+        {
+            String output = "";
+            try
+            {
+                Sql.Table = this.Table;
+                Entity data = input as Entity;
+                List<Parameters> param = data.ToParamMySqlNotNull(Entity);
+                if (data != null)
+                {
+                    switch (data.OPERATION)
+                    {
+                        case Operation.Create:
+                            output = Sql.insert(param);
+                            break;
+                        case Operation.Update:
+                            output = Sql.update(param);
+                            break;
+                        case Operation.Delete:
+                            output = Sql.delete(condition);
+                            break;
+                    }
+                    
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Exceptions.Db(e, this.Table);
+            }
+            return output;
+        }
+
         public virtual Int32 CountData(InputParameters input)
         {
             TotalData = 0;
@@ -173,7 +208,7 @@ namespace MySql.Driver
                 Sql.Condition = input.CONDITION;
                 var query = Sql.count();
 
-                Driver = new MySql.Driver.DB.Driver();
+                Driver = new MySql.Driver.DB.Driver(Profile);
                 TotalData = Driver.Count(query);
             }
             catch (Exception e)
@@ -187,7 +222,7 @@ namespace MySql.Driver
             TotalData = 0;
             try
             {
-                Driver = new MySql.Driver.DB.Driver();
+                Driver = new MySql.Driver.DB.Driver(Profile);
                 TotalData = Driver.Count(query);
             }
             catch (Exception e)

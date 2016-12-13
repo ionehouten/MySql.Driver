@@ -444,7 +444,7 @@ namespace MySql.Driver.DB
             return Output;
         }
 
-        public OutputParameters Export(string filepath, bool createdatabase, bool tablestructure, bool rows, bool views, bool triggers, bool functions, bool procedures,List<string> listTable = null)
+        public OutputParameters Export(string filepath, bool createdatabase, bool tablestructure, bool rows, bool views, bool triggers, bool functions, bool procedures,List<string> listTable = null, Dictionary<string,string> tablecustom = null)
         {
             OutputParameters Output = new OutputParameters();
             Output.MESSAGE = "";
@@ -470,8 +470,9 @@ namespace MySql.Driver.DB
                             Backup.ExportInfo.ExportTriggers = triggers;
                             Backup.ExportInfo.ExportFunctions = functions;
                             Backup.ExportInfo.ExportProcedures = procedures;
-                            Backup.ExportInfo.ResetAutoIncrement = true;
+                            Backup.ExportInfo.ResetAutoIncrement = false;
                             Backup.ExportInfo.TablesToBeExportedList = listTable;
+                            Backup.ExportInfo.TablesToBeExportedDic = tablecustom;
                             Backup.ExportToFile(filepath);
 
                         }
@@ -523,6 +524,7 @@ namespace MySql.Driver.DB
                             Backup.Command = Command;
                             Backup.ImportInfo.TargetDatabase = targetdb;
                             Backup.ImportInfo.DatabaseDefaultCharSet = charset;
+                            Backup.ImportInfo.IgnoreSqlError = true;
                             Backup.ImportFromFile(filepath);
                         }
 

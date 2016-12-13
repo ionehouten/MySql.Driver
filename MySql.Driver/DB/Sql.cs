@@ -100,15 +100,15 @@ namespace MySql.Driver.DB
             SqlBuilder = @"INSERT INTO " + this.Table + " (" + field + ") VALUES (" + value + ") ;";
             return SqlBuilder;
         }
-        public string insert(List<InputData> data)
+        public string insert(List<Parameters> data)
         {
             var field = string.Empty;
             var value = string.Empty;
 
             for (int i = 0; i < data.Count; i++)
             {
-                field += "`" + data[i].KEY + "`,";
-                value += "" + data[i].VAL + ",";
+                field += "`" + data[i].FIELD + "`,";
+                value += "'" + data[i].VALUE + "',";
             }
             field = field.Substring(0, field.Length - 1);
             value = value.Substring(0, value.Length - 1);
@@ -133,7 +133,7 @@ namespace MySql.Driver.DB
             SqlBuilder = @"UPDATE `" + this.Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
             return SqlBuilder;
         }
-        public string update(List<InputData> data)
+        public string update(List<Parameters> data)
         {
             string field = string.Empty;
             string value = string.Empty;
@@ -141,8 +141,8 @@ namespace MySql.Driver.DB
 
             for (int i = 0; i < data.Count; i++)
             {
-                field = "`" + data[i].KEY + "`";
-                value = data[i].VAL.ToString();
+                field = "`" + data[i].FIELD + "`";
+                value = data[i].VALUE.ToString();
 
                 update += field + "=" + value + ",";
             }
@@ -151,6 +151,11 @@ namespace MySql.Driver.DB
             return SqlBuilder;
         }
 
+        public string delete(String condition)
+        {
+            SqlBuilder = "DELETE FROM `" + this.Table + "` WHERE " + condition + ";";
+            return SqlBuilder;
+        }
         public string delete()
         {
             SqlBuilder = "DELETE FROM `" + this.Table + "` WHERE " + this.Condition + ";";
