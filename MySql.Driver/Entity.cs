@@ -2,6 +2,7 @@
 
 namespace MySql.Driver
 {
+    [Serializable]
     public class Entity
     {
         public Entity()

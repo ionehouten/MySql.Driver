@@ -4,4 +4,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>D:\PROJECT\C Sharp\AP4A Tasik\AP4A\AP4A\bin\Debug\AP4A.Launcher.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ShowAllFiles</ProjectView>
+  </PropertyGroup>
 </Project>

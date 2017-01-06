@@ -1,2 +1,8 @@
 /MySql.Driver/obj
 /.vs
+/MySql.Driver.Example/obj
+/MySql.Driver.Example/bin/Release/logs
+/MySql.Driver.Example/bin/Release/MySql.Driver.Example.vshost.exe.manifest
+/MySql.Driver.Example/bin/Release/MySql.Driver.Example.pdb
+/MySql.Driver.Example/bin/Release/MySql.Driver.Example.vshost.exe
+/MySql.Driver.Example/bin/Release/MySql.Driver.Example.vshost.exe.config
