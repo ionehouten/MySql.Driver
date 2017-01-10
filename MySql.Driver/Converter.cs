@@ -41,415 +41,287 @@ namespace MySql.Driver
             catch (Exception e)
             {
                 output = 0;
-                Exceptions.Default(e, "toDecimal");
+                Console.WriteLine(e.Message);
             }
             return output;
 
         }
         public static Double toDouble(object input)
         {
-            Double output;
+            Double output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToDouble(input, CultureInfo.InvariantCulture);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-
-                Exceptions.Default(e, "Double");
-
             }
             return output;
         }
         public static Nullable<Decimal> toDecimalNull(object input)
         {
-            Nullable<Decimal> output;
+            Nullable<Decimal> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToDecimal(input);
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toDecimal");
-
             }
             return output;
             
         }
         public static Nullable<Double> toDoubleNull(object input)
         {
-            Nullable<Double> output;
+            Nullable<Double> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToDouble(input);
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toDouble");
-
             }
             return output;
 
         }
         public static Int16 toInt16(object input)
         {
-            Int16 output;
+            Int16 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt16(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-                Exceptions.Default(e, "toInt16");
             }
             return output;
         }
         public static UInt16 toUInt16(object input)
         {
-            UInt16 output;
+            UInt16 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToUInt16(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-                Exceptions.Default(e, "toUInt16");
             }
             return output;
         }
         public static Int32 toInt32(object input)
         {
-            Int32 output;
+            Int32 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt32(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-                Exceptions.Default(e, "toInt32");
             }
             return output;
         }
         public static UInt32 toUInt32(object input)
         {
-            UInt32 output;
+            UInt32 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToUInt32(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-                Exceptions.Default(e, "toUInt32");
             }
             return output;
         }
         public static Int64 toInt64(object input)
         {
-            Int64 output;
+            Int64 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt64(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-
-                Exceptions.Default(e, "toInt64");
-
             }
             return output;
         }
         public static Int64 toUInt64(object input)
         {
-            Int64 output;
+            Int64 output = 0;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt64(input);
                 }
-                else
-                {
-                    return 0;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = 0;
-                Exceptions.Default(e, "toInt64");
             }
             return output;
         }
         public static Nullable<Int16> toInt16Null(object input)
         {
-            Nullable<Int16> output;
+            Nullable<Int16> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt16(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toInt16");
-
             }
             return output;
         }
         public static Nullable<UInt16> toUInt16Null(object input)
         {
-            Nullable<UInt16> output;
+            Nullable<UInt16> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToUInt16(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-                Exceptions.Default(e, "toUInt16");
             }
             return output;
         }
         public static Nullable<Int32> toInt32Null(object input)
         {
-            Nullable<Int32> output;
+            Nullable<Int32> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt32(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toInt32");
-
             }
             return output;
         }
         public static Nullable<UInt32> toUInt32Null(object input)
         {
-            Nullable<UInt32> output;
+            Nullable<UInt32> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToUInt32(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-                Exceptions.Default(e, "toUInt32");
             }
             return output;
         }
         public static Nullable<Int64> toInt64Null(object input)
         {
-            Nullable<Int64> output;
+            Nullable<Int64> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToInt64(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toInt64");
-
             }
             return output;
         }
         public static Nullable<UInt64> toUInt64Null(object input)
         {
-            Nullable<UInt64> output;
+            Nullable<UInt64> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToUInt64(input);
                 }
-                else
-                {
-                    return null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-                Exceptions.Default(e, "toUInt64");
             }
             return output;
         }
         public static String toString(object input)
         {
-            string output;
+            string output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToString(input).Trim();
                 }
-                else
-                {
-                    return "";
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-                Exceptions.Default(e, "toString");
-
             }
             return output;
             
         }
         public static Boolean toBoolean(object input)
         {
-            bool output;
+            bool output = false;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     return Convert.ToBoolean(input);
                 }
-                else
-                {
-                    return false;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = false;
-
-                Exceptions.Default(e, "toBoolean");
-
             }
             return output;
         }
         public static Nullable<TimeSpan> toTimeSpanNull(object input)
         {
-            Nullable<TimeSpan> output;
+            Nullable<TimeSpan> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     output = TimeSpan.Parse(input.ToString());
                 }
-                else
-                {
-                    output = null;
-                }
-
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toTimeSpanNull");
-
             }
             return output;
         }
         public static Nullable<DateTime> toDateTime(object input)
         {
-            DateTime? output;
+            DateTime? output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
@@ -469,72 +341,46 @@ namespace MySql.Driver
                     }
                     
                 }
-                else
-                {
-                    output = null;
-                }
-
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toDateTime");
-
             }
             return output;
         }
         public static DateTime toDateTime(string input)
         {
-            DateTime output;
+            DateTime output  = new DateTime(1999, 09, 09);
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     output = Convert.ToDateTime(input);
                 }
-                else
-                {
-                    output = new DateTime(1999,09,09);
-                }
 
             }
-            catch (Exception e)
+            catch
             {
-                output = new DateTime(1999, 09, 09);
-
-                Exceptions.Default(e, "toDateTime");
-
             }
             return output;
         }
         public static TimeSpan toTimeSpan(object input)
         {
-            TimeSpan output;
+            TimeSpan output = new TimeSpan(00, 00, 00);
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     TimeSpan.TryParse(input.ToString(), out output);
                 }
-                else
-                {
-                    output = new TimeSpan(00,00,00);
-                }
-
             }
-            catch (Exception e)
+            catch
             {
-                output = output = new TimeSpan(00, 00, 00);
-
-                Exceptions.Default(e, "toDateTime");
-
             }
             return output;
         }
         public static String formatDate(object input, string format = "dd-MM-yyyy")
         {
-            string output;
+            string output = "";
             DateTime? toDateTime;
             try
             {
@@ -545,28 +391,16 @@ namespace MySql.Driver
                     {
                         output = toDateTime.Value.ToString(format);
                     }
-                    else
-                    {
-                        output = "";
-                    }
-                }
-                else
-                {
-                    output = "";
                 }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e,"formateDate");
-
             }
             return output;
         }
         public static String formatTime(object input, string format = "HH:mm:ss")
         {
-            string output;
+            string output = "";
             DateTime? toDateTime;
             try
             {
@@ -577,28 +411,16 @@ namespace MySql.Driver
                     {
                         output = toDateTime.Value.ToString(format);
                     }
-                    else
-                    {
-                        output = "";
-                    }
-                }
-                else
-                {
-                    output = "";
                 }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "formatTime");
-
             }
             return output;
         }
         public static Image toImage(object input)
         {
-            Image output;
+            Image output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)) )
@@ -609,23 +431,10 @@ namespace MySql.Driver
                         MemoryStream ms = new MemoryStream(bytes);
                         output = Image.FromStream(ms);
                     }
-                    else
-                    {
-                        output = null;
-                    }
-                    
-                }
-                else
-                {
-                    output = null;
                 }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e,"toImage");
-
             }
             return output;
             
@@ -634,7 +443,7 @@ namespace MySql.Driver
       
         public static byte[] toByteArray(string input)
         {
-            byte[] output;
+            byte[] output = null;
             try
             {
                 if (!String.IsNullOrEmpty(input))
@@ -645,24 +454,16 @@ namespace MySql.Driver
                     output = new byte[fs.Length];
                     fs.Read(output, 0, Convert.ToInt32(fs.Length));
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toByteArray");
-
             }
             return output;
             
         }
         public static byte[] toByteArray(Image input)
         {
-            byte[] output;
+            byte[] output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
@@ -672,19 +473,11 @@ namespace MySql.Driver
                     input.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
                     output = ms.ToArray();
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toByteArray");
-
             }
-            
+
             return output;
         }
         public static Byte[] toByteArray(Object input)
@@ -700,24 +493,16 @@ namespace MySql.Driver
         }
         public static Nullable<Byte> toByte(Object input)
         {
-            Nullable<Byte> output;
+            Nullable<Byte> output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     output = Convert.ToByte(input);
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toByte");
-
             }
             return output;
 
@@ -753,24 +538,16 @@ namespace MySql.Driver
         }
         public static Byte[] toByteArrayFromBase64(Object input)
         {
-            byte[] output;
+            byte[] output = null;
             try
             {
                 if ((input != null) && (!input.Equals(DBNull.Value)))
                 {
                     output = Convert.FromBase64String(input.ToString());
                 }
-                else
-                {
-                    output = null;
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = null;
-
-                Exceptions.Default(e, "toByteArrayFromBase64");
-
             }
 
             return output;
@@ -778,26 +555,16 @@ namespace MySql.Driver
         public static string toHexStringUsingBit(byte[] input)
         {
 
-            string output;
+            string output = null;
             try
             {
                 if (input != null)
                 {
                     output = BitConverter.ToString(input).Replace("-", "");//Str to Hex
-
-
-                }
-                else
-                {
-                    output = "";
                 }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "byteArrayToString");
-
             }
             return output;
 
@@ -805,24 +572,16 @@ namespace MySql.Driver
         public static string toHexStringUsingASCIIEncoding(byte[] input)
         {
 
-            string output;
+            string output = null;
             try
             {
                 if (input != null)
                 {
                     output = ASCIIEncoding.Default.GetString(input);
                 }
-                else
-                {
-                    output = "";
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "Models.toHexStringUsingASCIIEncoding");
-
             }
             return output;
 
@@ -834,7 +593,7 @@ namespace MySql.Driver
             foreach (byte b in input)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();*/
-            string output;
+            string output = null;
             try
             {
                 if (input != null)
@@ -851,17 +610,9 @@ namespace MySql.Driver
                     //output = BitConverter.ToString(input);
                     //return output.Replace("-", "");
                 }
-                else
-                {
-                    output = "";
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "byteArrayToString");
-
             }
             return output;
 
@@ -869,33 +620,23 @@ namespace MySql.Driver
         public static string toHexStringUsingUrlToken(byte[] input)
         {
 
-            string output;
+            string output = null;
             try
             {
                 if (input != null)
                 {
-
                     output = HttpServerUtility.UrlTokenEncode(input);
-
-                }
-                else
-                {
-                    output = "";
                 }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "Models.toHexStringUsingUrlToken");
-
             }
             return output;
 
         }
         public static string toHexStringUsingStringBuilder(byte[] input)
         {
-            string output;
+            string output = null;
             try
             {
                 if (input != null)
@@ -906,17 +647,9 @@ namespace MySql.Driver
                         hex.AppendFormat("{0:x2}", b);
                     output =  hex.ToString();
                 }
-                else
-                {
-                    output = "";
-                }
             }
-            catch (Exception e)
+            catch
             {
-                output = "";
-
-                Exceptions.Default(e, "Models.toHexStringUsingStringBuilder");
-
             }
             return output;
 

@@ -473,6 +473,7 @@ namespace MySql.Driver.DB
                             Backup.ExportInfo.ResetAutoIncrement = false;
                             Backup.ExportInfo.TablesToBeExportedList = listTable;
                             Backup.ExportInfo.TablesToBeExportedDic = tablecustom;
+                            Backup.ExportInfo.ScriptsDelimiter = ";;";
                             Backup.ExportToFile(filepath);
 
                         }

@@ -91,7 +91,6 @@ namespace MySql.Driver
         {
             try
             {
-                Thread.Sleep(100);
                 await Task.Run(() => DataTable.ToList(this.Entity, binding, ctrl));
             }
             catch(Exception ex)
