@@ -11,8 +11,6 @@ namespace MySql.Driver
         DataTable DataTable { get; set; }
         DataTable DataDetail { get; set; }
         int TotalData { get; set; }
-        String Table { get; set; }
-        String View { get; set; }
         Sql Sql { get; set; }
     }
 }

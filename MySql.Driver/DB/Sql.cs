@@ -12,26 +12,27 @@ namespace MySql.Driver.DB
         public Sql() { }
 
         private string SqlBuilder;
+        public string Schema { get; set; }
         public string Table { get; set; }
-
+        public string View { get; set; }
         public string[] Fields { get; set; }
         public string Index { get; set; }
-
         public string Condition { get; set; }
         public string Group { get; set; }
-
         public string Having { get; set; }
-
         public string Order { get; set; }
         public int Limit { get; set; }
-
         public int Offset { get; set; }
         public string Query { get; set; }
 
+        public string getTable()
+        {
+            return  (!String.IsNullOrEmpty(Schema)) ? String.Format("`{0}`.`{1}`", Schema, (!String.IsNullOrEmpty(View)) ? View : Table) : String.Format("`{0}`", (!String.IsNullOrEmpty(View)) ? View : Table);
+        }
         public string select()
         {
             var query = (Query != null) ? Query.Trim() : null;
-            var table = Table;
+            var table = getTable();
             var fields = string.Join(",", Fields);
             var index = Index;
             var condition = (!String.IsNullOrEmpty(Condition)) ? Condition.Trim() : null;
@@ -41,9 +42,11 @@ namespace MySql.Driver.DB
             var limit = (Limit != 0) ? Limit.ToString().Trim() : null;
             var offset = (Offset != 0) ? Offset.ToString().Trim() : null;
 
+
+
             if (Query == null)
             {
-                SqlBuilder = "SELECT " + fields + " FROM `" + this.Table + "`";
+                SqlBuilder = "SELECT " + fields + " FROM " + table + "";
             }
             else
             {
@@ -71,11 +74,11 @@ namespace MySql.Driver.DB
 
             return SqlBuilder;
         }
-
         public string count()
         {
+            var table = getTable();
             var condition = (Condition != null) ? Condition.Trim() : null;
-            SqlBuilder = "SELECT COUNT(*) FROM `" + Table + "` ";
+            SqlBuilder = "SELECT COUNT(*) FROM " + table + " ";
 
             if (condition != null && condition != string.Empty)
             {
@@ -83,7 +86,6 @@ namespace MySql.Driver.DB
             }
             return SqlBuilder;
         }
-
         public string insert(Hashtable data)
         {
             ICollection key = data.Keys;
@@ -97,11 +99,12 @@ namespace MySql.Driver.DB
             }
             field = field.Substring(0, field.Length - 1);
             value = value.Substring(0, value.Length - 1);
-            SqlBuilder = @"INSERT INTO " + this.Table + " (" + field + ") VALUES (" + value + ") ;";
+            SqlBuilder = @"INSERT INTO `" + Table + "` (" + field + ") VALUES (" + value + ") ;";
             return SqlBuilder;
         }
         public string insert(List<Parameters> data)
         {
+
             var field = string.Empty;
             var value = string.Empty;
 
@@ -112,12 +115,13 @@ namespace MySql.Driver.DB
             }
             field = field.Substring(0, field.Length - 1);
             value = value.Substring(0, value.Length - 1);
-            SqlBuilder = @"INSERT INTO `" + this.Table + "` (" + field + ") VALUES (" + value + ") ;";
+            SqlBuilder = @"INSERT INTO `" + Table + "` (" + field + ") VALUES (" + value + ") ;";
             return SqlBuilder;
         }
-
         public string update(Hashtable data)
         {
+            var table = (!String.IsNullOrEmpty(Schema)) ? String.Format("`{0}`.`{1}`", Schema, (!String.IsNullOrEmpty(View)) ? View : Table) : String.Format("`{0}`", (!String.IsNullOrEmpty(View)) ? View : Table);
+
             ICollection key = data.Keys;
             var field = string.Empty;
             var value = string.Empty;
@@ -130,7 +134,7 @@ namespace MySql.Driver.DB
                 update += field + "=" + value + ",";
             }
             update = update.Substring(0, update.Length - 1);
-            SqlBuilder = @"UPDATE `" + this.Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
+            SqlBuilder = @"UPDATE `" + Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
             return SqlBuilder;
         }
         public string update(List<Parameters> data)
@@ -147,27 +151,24 @@ namespace MySql.Driver.DB
                 update += field + "=" + value + ",";
             }
             update = update.Substring(0, update.Length - 1);
-            SqlBuilder = "UPDATE `" + this.Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
+            SqlBuilder = "UPDATE `" + Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
             return SqlBuilder;
         }
-
         public string delete(String condition)
         {
-            SqlBuilder = "DELETE FROM `" + this.Table + "` WHERE " + condition + ";";
+            SqlBuilder = "DELETE FROM `" + Table + "` WHERE " + condition + ";";
             return SqlBuilder;
         }
         public string delete()
         {
-            SqlBuilder = "DELETE FROM `" + this.Table + "` WHERE " + this.Condition + ";";
+            SqlBuilder = "DELETE FROM `" + Table + "` WHERE " + this.Condition + ";";
             return SqlBuilder;
         }
-        
         public string truncate()
         {
-            SqlBuilder = "TRUNCATE TABLE `" + this.Table + "`;";
+            SqlBuilder = "TRUNCATE TABLE `" + Table + "`;";
             return SqlBuilder;
         }
-
         public MySqlCommand insertCmd(List<Parameters> data = null)
         {
             MySqlCommand Command = new MySqlCommand();
@@ -202,14 +203,13 @@ namespace MySql.Driver.DB
             field = field.Substring(0, field.Length - 1);
             param = param.Substring(0, param.Length - 1);
 
-            SqlBuilder = "INSERT INTO " + this.Table + " (" + field + ") VALUES (" + param + ") ;";
+            SqlBuilder = "INSERT INTO `" + Table + "` (" + field + ") VALUES (" + param + ") ;";
             Command.CommandText = SqlBuilder;
 
 
             return Command;
 
         }
-
         public MySqlCommand updateCmd(List<Parameters> data = null)
         {
             MySqlCommand Command = new MySqlCommand();
@@ -241,18 +241,17 @@ namespace MySql.Driver.DB
       
 
             update = update.Substring(0, update.Length - 1);
-            SqlBuilder = "UPDATE " + this.Table + " SET  " + update + "  WHERE " + this.Condition + ";";
+            SqlBuilder = "UPDATE `" + Table + "` SET  " + update + "  WHERE " + this.Condition + ";";
             Command.CommandText = SqlBuilder;
 
 
 
             return Command;
         }
-
         public MySqlCommand deleteCmd()
         {
             MySqlCommand Command = new MySqlCommand();
-            SqlBuilder = "DELETE FROM " + this.Table + " WHERE " + this.Condition + " ;";
+            SqlBuilder = "DELETE FROM `" + Table + "` WHERE " + this.Condition + " ;";
             Command.CommandText = SqlBuilder;
 
             return Command;

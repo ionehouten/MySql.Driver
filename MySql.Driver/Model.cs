@@ -19,9 +19,6 @@ namespace MySql.Driver
         public DataTable DataDetail { get; set; }
         public int TotalData { get; set; }
         public Sql Sql { get; set; }
-        public string Table { get; set; }
-        public string View { get; set; }
-
         public Type Entity;
         
         public Model(String Profile = "DEFAULT")
@@ -29,15 +26,42 @@ namespace MySql.Driver
             Sql = new Sql();
             this.Profile = Profile;
             this.setFields(new string[] { "*" });
+
+            EntityAttribute entityAttribute = this.GetAttributeEntity();
+            if(entityAttribute != null)
+            {
+                this.setEntity(entityAttribute.Type);
+                TableAttribute tableAttribute = this.Entity.GetAttributeTable();
+                if(tableAttribute != null)
+                {
+                    this.setSchema(tableAttribute.Schema);
+                    this.setTable(tableAttribute.Name);
+                }
+
+                ViewAttribute viewAttribute = this.Entity.GetAttributeView();
+                if (viewAttribute != null)
+                {
+                    this.setSchema(viewAttribute.Schema);
+                    this.setView(viewAttribute.Name);
+                }
+                FieldsAttribute fieldsAttribute = this.Entity.GetAttributeFields();
+                if (fieldsAttribute != null)
+                {
+                    this.setFields(fieldsAttribute.Fields);
+                }
+            }
+        }
+        protected void setSchema(string value)
+        {
+            this.Sql.Schema = value;
         }
         protected void setTable(string value)
         {
-            this.Table = value;
             this.Sql.Table = value;
         }
         protected void setView(string value)
         {
-            this.View = View;
+            this.Sql.View = value;
         }
         protected void setFields(string[] value)
         {
@@ -47,9 +71,14 @@ namespace MySql.Driver
         {
             this.Entity = type;
         }
-        //public abstract OutputParameters GetData(InputParameters input);
-        //public abstract OutputParameters Execute(Object input);
-        //public abstract Int32 CountData(InputParameters input);
+        public virtual async Task<OutputParameters> GetDataTask(InputParameters input)
+        {
+            return await Task.Run(() => GetData(input));
+        }
+        public virtual async Task<OutputParameters> GetDataTask(String query)
+        {
+            return await Task.Run(() => GetData(query));
+        }
         public virtual OutputParameters GetData(InputParameters input)
         {
             OutputParameters output = new OutputParameters();
@@ -60,7 +89,14 @@ namespace MySql.Driver
             var select = Sql.select();
             Driver = new MySql.Driver.DB.Driver(Profile);
             output = Driver.Find(select,Entity);
-
+            if (output.DATA != null)
+            {
+                output.DATA_EXIST = true;
+            }
+            else
+            {
+                output.DATA_EXIST = false;
+            }
             return output;
         }
         public virtual OutputParameters GetData(String query)
@@ -68,37 +104,33 @@ namespace MySql.Driver
             OutputParameters output = new OutputParameters();
             Driver = new MySql.Driver.DB.Driver(Profile);
             output = Driver.Find(query, Entity);
-
+            if (output.DATA != null)
+            {
+                output.DATA_EXIST = true;
+            }
+            else
+            {
+                output.DATA_EXIST = false;
+            }
             return output;
         }
-
-        public virtual OutputParameters GetData(InputParameters input, BindingSource binding, Control ctrl)
+        public virtual async Task<OutputParameters> GetData(InputParameters input, BindingSource binding, Control ctrl)
         {
-            
             OutputParameters output = new OutputParameters();
-            Sql.Condition = input.CONDITION;
-            Sql.Order = input.ORDER;
-            Sql.Limit = input.LIMIT;
-            Sql.Offset = input.OFFSET;
-            var select = Sql.select();
-            Driver = new MySql.Driver.DB.Driver(Profile);
-            DataTable = Driver.Find(select);
-            GetDataAsync(binding, ctrl);
+            GetDataTable(input);
+            await Task.Run(() => DataTable.ToList(this.Entity, binding, ctrl));
+
+            if (DataTable.Rows.Count > 0)
+            {
+                output.DATA_EXIST = true;
+            }
+            else
+            {
+                output.DATA_EXIST = false;
+            }
+            DataTable = null;
             return output;
         }
-
-        public virtual async void GetDataAsync(BindingSource binding, Control ctrl)
-        {
-            try
-            {
-                await Task.Run(() => DataTable.ToList(this.Entity, binding, ctrl));
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
         public virtual DataTable GetDataTable(InputParameters input)
         {
             DataTable = new DataTable();
@@ -118,7 +150,6 @@ namespace MySql.Driver
             OutputParameters output = new OutputParameters();
             try
             {
-                Sql.Table = this.Table;
                 Entity data = input as Entity;
                 List<Parameters> param = data.ToParamMySqlNotNull(Entity);
                 if (data != null)
@@ -139,7 +170,7 @@ namespace MySql.Driver
                             break;
                     }
                     Driver = new MySql.Driver.DB.Driver(Profile);
-                    output = Driver.Cmd(Command, Operation.Create);
+                    output = Driver.Cmd(Command, data.OPERATION);
                     if (output.ID != null)
                     {
                         (input as Entity).SetPrimaryKey(output.ID);
@@ -160,10 +191,25 @@ namespace MySql.Driver
             }
             catch (Exception e)
             {
-                Exceptions.Db(e, this.Table);
+                Exceptions.Db(e, this.Sql.Table);
                 output.MESSAGE = e.Message;
             }
             return output;
+        }
+        public virtual Int32 ExecuteQuery(String query)
+        {
+            int Output= 0;
+            try
+            {
+
+                Driver = new MySql.Driver.DB.Driver(Profile);
+                Output = Driver.Count(query);
+            }
+            catch (Exception e)
+            {
+                Exceptions.Db(e, this.Sql.Table);
+            }
+            return Output;
         }
 
         public virtual String GetQuery(object input, string condition = "")
@@ -171,7 +217,6 @@ namespace MySql.Driver
             String output = "";
             try
             {
-                Sql.Table = this.Table;
                 Entity data = input as Entity;
                 List<Parameters> param = data.ToParamMySqlNotNull(Entity);
                 if (data != null)
@@ -194,7 +239,7 @@ namespace MySql.Driver
             }
             catch (Exception e)
             {
-                Exceptions.Db(e, this.Table);
+                Exceptions.Db(e, this.Sql.Table);
             }
             return output;
         }
@@ -212,7 +257,7 @@ namespace MySql.Driver
             }
             catch (Exception e)
             {
-                Exceptions.Db(e, this.Table);
+                Exceptions.Db(e, this.Sql.Table);
             }
             return TotalData;
         }
@@ -226,27 +271,12 @@ namespace MySql.Driver
             }
             catch (Exception e)
             {
-                Exceptions.Db(e, this.Table);
+                Exceptions.Db(e, this.Sql.Table);
             }
             return TotalData;
         }
 
-        public void GetAttribute(Type t)
-        {
-            // Get instance of the attribute.
-            TableAttribute MyAttribute = (TableAttribute)Attribute.GetCustomAttribute(t, typeof(TableAttribute));
-
-            if (MyAttribute == null)
-            {
-                Console.WriteLine("The attribute was not found.");
-            }
-            else
-            {
-                // Get the Name value.
-                Console.WriteLine("The Name Attribute is: {0}.", MyAttribute.Name);
-                
-            }
-        }
+        
         
     }
 

@@ -9,5 +9,6 @@ namespace MySql.Driver
         public String RESULT { get; set; }
         public String MESSAGE { get; set; }
         public Int64? ID { get; set; }
+        public Boolean DATA_EXIST{ get; set; }
     }
 }

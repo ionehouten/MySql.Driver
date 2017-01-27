@@ -40,7 +40,7 @@ namespace Example.Controllers
             }
            
         }
-        public virtual void LoadData()
+        public virtual async void LoadData()
         {
             try
             {
@@ -52,7 +52,7 @@ namespace Example.Controllers
                 input.OFFSET = Config.offset;
                 input.CONDITION = "";
                 totalData = model.CountData(input);
-                output = model.GetData(input, bindingSource1, this);
+                output = await model.GetData(input, bindingSource1, this);
             }
             catch (Exception ex)
             {

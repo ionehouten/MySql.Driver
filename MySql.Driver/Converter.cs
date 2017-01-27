@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Collections;
 using System.Threading;
 using System.Windows.Forms;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MySql.Driver
 {
@@ -421,22 +422,25 @@ namespace MySql.Driver
         public static Image toImage(object input)
         {
             Image output = null;
-            try
+            using (output = null)
             {
-                if ((input != null) && (!input.Equals(DBNull.Value)) )
+                try
                 {
-                    if (!String.IsNullOrEmpty(input.ToString()))
+                    if ((input != null) && (!input.Equals(DBNull.Value)))
                     {
-                        byte[] bytes = (byte[])input;
-                        MemoryStream ms = new MemoryStream(bytes);
-                        output = Image.FromStream(ms);
+                        if (!String.IsNullOrEmpty(input.ToString()))
+                        {
+                            byte[] bytes = (byte[])input;
+                            MemoryStream ms = new MemoryStream(bytes);
+                            output = Image.FromStream(ms);
+                        }
                     }
                 }
+                catch
+                {
+                }
+                return output;
             }
-            catch
-            {
-            }
-            return output;
             
         }
 
@@ -1454,6 +1458,42 @@ namespace MySql.Driver
 
                         if (field != null)
                         {
+                            /*
+                            if (value == DBNull.Value)
+                        {
+                            if (vType == typeof(int) || vType == typeof(Int16)
+                                                     || vType == typeof(Int32)
+                                                     || vType == typeof(Int64)
+                                                     || vType == typeof(decimal)
+                                                     || vType == typeof(float)
+                                                     || vType == typeof(double))
+                            {
+                                value = 0;
+                            }
+
+                            else if (vType == typeof(bool))
+                            {
+                                value = false;
+                            }
+
+                            else if (vType == typeof(DateTime))
+                            {
+                                value = DateTime.MaxValue;
+                            }
+
+                            else
+                            {
+                                value = null;
+                            }
+
+                            prop.SetValue(obj, value, null);
+                        }
+
+                        else
+                        {
+                            prop.SetValue(obj, value, null);
+                        }
+                            */
 
                             if (propertyInfos.PropertyType == typeof(DateTime) || propertyInfos.PropertyType == typeof(DateTime?))
                             {
@@ -1564,13 +1604,6 @@ namespace MySql.Driver
             var dataList = MySql.Driver.DataFiller.GetInstanceList(type);
             try
             {
-                //ctrl.Invoke(
-                //        new Action(() =>
-                //        {
-                //            binding.DataSource = dataList;
-                //        }
-                //    ));
-
                 ctrl.Invoke((MethodInvoker)delegate
                 {
                     binding.DataSource = dataList;
@@ -1593,6 +1626,7 @@ namespace MySql.Driver
                         Type = item.DataType
                     }).ToList();
                 var i = 1;
+                var j = 1;
                 foreach (DataRow dataRow in dataTable.AsEnumerable().ToList())
                 {
 
@@ -1603,6 +1637,9 @@ namespace MySql.Driver
                         propertyNo.SetValue(classObj, i, null);
                     }
                     i++;
+                    j++;
+
+                    #region LOOP
                     foreach (var dtField in dtlFieldNames)
                     {
                         try
@@ -1694,6 +1731,11 @@ namespace MySql.Driver
                                     propertyInfos.SetValue
                                     (classObj, Converter.toByteArray(dataRow[dtField.Name]), null);
                                 }
+                                else if (propertyInfos.PropertyType == typeof(Boolean))
+                                {
+                                    propertyInfos.SetValue
+                                    (classObj, Converter.toBoolean(dataRow[dtField.Name]), null);
+                                }
                                 else if (propertyInfos.PropertyType == typeof(String))
                                 {
                                     if (dataRow[dtField.Name].GetType() == typeof(DateTime))
@@ -1714,23 +1756,44 @@ namespace MySql.Driver
                             continue;
                         }
                     }
+                    #endregion
+
                     if (ctrl.IsDisposed == true)
                     {
                         break;
                     }
 
-                    //ctrl.Invoke(
-                    //     new Action(() =>
-                    //     {
-                    //         binding.Add(classObj);
-                    //     }
-                    // ));
-                    ctrl.Invoke((MethodInvoker)delegate
+                    //if(j < 100)
+                    //{
+                    //    j = 1;
+                    //    ctrl.BeginInvoke((MethodInvoker)delegate
+                    //    {
+                    //        binding.Add(classObj);
+                    //    });
+                    //}
+                    //else
+                    //{
+                    //    ctrl.Invoke((MethodInvoker)delegate
+                    //    {
+                    //        binding.Add(classObj);
+                    //    });
+                    //}
+                   
+                    dataList.Add(classObj);
+                    if (j == 1000)
                     {
-                        binding.Add(classObj);
-                    });
-
+                        j = 1;
+                        ctrl.Invoke((MethodInvoker)delegate
+                        {
+                            binding.ResetBindings(false);
+                        });
+                    }
                 }
+                ctrl.Invoke((MethodInvoker)delegate
+                {
+                    binding.ResetBindings(false);
+                    ctrl.Refresh();
+                });
             }
             catch(Exception ex)
             {
@@ -1738,46 +1801,11 @@ namespace MySql.Driver
             }
             return dataList;
         }
-        public static List<MySql.Driver.DB.Parameters> ToParamMySql<T>(this Entity entity) where T : new()
+        public static List<Parameters> ToParamMySql<T>(this Entity entity) where T : new()
         {
-            List<MySql.Driver.DB.Parameters> parameters = new List<MySql.Driver.DB.Parameters>();
-
-            //Define what attributes to be read from the class
-            const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
-
-            //Read Attribute Names and Types
-            var objFieldNames = typeof(T).GetProperties(flags).Cast<PropertyInfo>().
-                Select(item => new
-                {
-                    Name = item.Name,
-                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
-                }).ToList();
-
-            var objFieldEntity = typeof(Entity).GetProperties(flags).Cast<PropertyInfo>().
-                Select(item => new
-                {
-                    Name = item.Name,
-                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
-                }).ToList();
-
-            foreach (var item in objFieldNames)
-            {
-                var itemEntity = objFieldEntity.Where(x => x.Name == item.Name).FirstOrDefault();
-                if (itemEntity == null)
-                {
-                    PropertyInfo propertyInfos = entity.GetType().GetProperty(item.Name);
-
-                    MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
-                    parameter.FIELD = item.Name;
-                    parameter.VALUE = propertyInfos.GetValue(entity);
-                    parameters.Add(parameter);
-                }
-
-            }
-
-            return parameters;
+            return entity.ToParamMySql(typeof(T));
         }
-        public static List<MySql.Driver.DB.Parameters> ToParamMySql(this Entity entity, Type type) 
+        public static List<Parameters> ToParamMySql(this Entity entity, Type type) 
         {
             List<MySql.Driver.DB.Parameters> parameters = new List<MySql.Driver.DB.Parameters>();
 
@@ -1804,75 +1832,27 @@ namespace MySql.Driver
                 var itemEntity = objFieldEntity.Where(x => x.Name == item.Name).FirstOrDefault();
                 if (itemEntity == null)
                 {
-                    PropertyInfo propertyInfos = entity.GetType().GetProperty(item.Name);
-
-                    MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
-                    parameter.FIELD = item.Name;
-                    parameter.VALUE = propertyInfos.GetValue(entity);
-                    parameters.Add(parameter);
-                }
-
-            }
-
-            return parameters;
-        }
-        public static List<MySql.Driver.DB.Parameters> ToParamMySqlNotNull<T>(this Entity entity) where T : new()
-        {
-            List<MySql.Driver.DB.Parameters> parameters = new List<MySql.Driver.DB.Parameters>();
-
-            //Define what attributes to be read from the class
-            const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
-
-            //Read Attribute Names and Types
-            var objFieldNames = typeof(T).GetProperties(flags).Cast<PropertyInfo>().
-                Select(item => new
-                {
-                    Name = item.Name,
-                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
-                }).ToList();
-
-            var objFieldEntity = typeof(Entity).GetProperties(flags).Cast<PropertyInfo>().
-                Select(item => new
-                {
-                    Name = item.Name,
-                    Type = Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType
-                }).ToList();
-
-            foreach (var item in objFieldNames)
-            {
-                var itemEntity = objFieldEntity.Where(x => x.Name == item.Name).FirstOrDefault();
-                if (itemEntity == null)
-                {
-                    PropertyInfo propertyInfos = entity.GetType().GetProperty(item.Name);
-                    Object value = propertyInfos.GetValue(entity);
-                    if (value != null)
+                    PropertyInfo property = entity.GetType().GetProperty(item.Name);
+                    if (GetAttributeReference(property) == false)
                     {
                         MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
                         parameter.FIELD = item.Name;
-                        parameter.TYPE = Converter.getMySqlDbTtype(propertyInfos.GetValue(entity));
-                        if (propertyInfos.PropertyType == typeof(Image))
-                        {
-                            parameter.VALUE = Converter.toByteArray(propertyInfos.GetValue(entity) as Image);
-                        }
-                        else
-                        {
-                            parameter.VALUE = propertyInfos.GetValue(entity);
-                        }
-
-
+                        parameter.VALUE = property.GetValue(entity);
                         parameters.Add(parameter);
                     }
-
-
                 }
 
             }
 
             return parameters;
         }
-        public static List<MySql.Driver.DB.Parameters> ToParamMySqlNotNull(this Entity entity, Type type)
+        public static List<Parameters> ToParamMySqlNotNull<T>(this Entity entity) where T : new()
         {
-            List<MySql.Driver.DB.Parameters> parameters = new List<MySql.Driver.DB.Parameters>();
+            return entity.ToParamMySqlNotNull(typeof(T));
+        }
+        public static List<Parameters> ToParamMySqlNotNull(this Entity entity, Type type)
+        {
+            List<Parameters> parameters = new List<Parameters>();
 
             //Define what attributes to be read from the class
             const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
@@ -1897,27 +1877,26 @@ namespace MySql.Driver
                 var itemEntity = objFieldEntity.Where(x => x.Name == item.Name).FirstOrDefault();
                 if (itemEntity == null)
                 {
-                    PropertyInfo propertyInfos = entity.GetType().GetProperty(item.Name);
-                    Object value = propertyInfos.GetValue(entity);
-                    if (value != null)
+                    PropertyInfo property = entity.GetType().GetProperty(item.Name);
+                    if (GetAttributeReference(property) == false)
                     {
-                        MySql.Driver.DB.Parameters parameter = new MySql.Driver.DB.Parameters();
-                        parameter.FIELD = item.Name;
-                        parameter.TYPE = Converter.getMySqlDbTtype(propertyInfos.GetValue(entity));
-                        if (propertyInfos.PropertyType == typeof(Image))
+                        Object value = property.GetValue(entity);
+                        if (property.GetValue(entity) != null)
                         {
-                            parameter.VALUE = Converter.toByteArray(propertyInfos.GetValue(entity) as Image);
+                            Parameters parameter = new Parameters();
+                            parameter.FIELD = item.Name;
+                            parameter.TYPE = Converter.getMySqlDbTtype(value);
+                            if (property.PropertyType == typeof(Image))
+                            {
+                                parameter.VALUE = Converter.toByteArray(value as Image);
+                            }
+                            else
+                            {
+                                parameter.VALUE = property.GetValue(entity);
+                            }
+                            parameters.Add(parameter);
                         }
-                        else
-                        {
-                            parameter.VALUE = propertyInfos.GetValue(entity);
-                        }
-                        
-                        
-                        parameters.Add(parameter);
                     }
-
-
                 }
 
             }
@@ -2036,54 +2015,7 @@ namespace MySql.Driver
 
             return output;
         }
-        //public static String SetPrimaryKey(this Entity instance, object key)
-        //{
-        //    string output = "";
-        //    PropertyInfo[] properties = instance.GetType().GetProperties();
-        //    List<MySql.Driver.DB.Parameters> param = new List<MySql.Driver.DB.Parameters>();
-        //    foreach (PropertyInfo row in properties)
-        //    {
-        //        foreach (CustomAttributeData item in row.CustomAttributes)
-        //        {
-        //            if (item.AttributeType.Name == "KeyAttribute")
-        //            {
-        //                if (row.PropertyType == typeof(Int16))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt16(key), null);
-        //                }
-        //                else if (row.PropertyType == typeof(Int32))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt32(key), null);
-        //                }
-        //                else if (row.PropertyType == typeof(Int64))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt64(key), null);
-        //                }
-        //                else if (row.PropertyType == typeof(Int16?))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt16Null(key), null);
-        //                }
-        //                else if (row.PropertyType == typeof(Int32?))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt32Null(key), null);
-        //                }
-        //                else if (row.PropertyType == typeof(Int64?))
-        //                {
-        //                    row.SetValue(instance, Converter.toInt64Null(key), null);
-        //                }
-        //                else
-        //                {
-
-        //                }
-                        
-        //                break;
-        //            }
-        //        }
-        //    }
-            
-
-        //    return output;
-        //}
+        
         public static String SetPrimaryKey(this Entity instance, object key)
         {
             string output = "";
@@ -2138,7 +2070,34 @@ namespace MySql.Driver
             var property = instance.GetType().GetProperty(propertyName);
             return (T)property.GetCustomAttributes(attrType, false).First();
         }
-
+        public static Boolean GetAttributeReference(PropertyInfo property)
+        {
+            Boolean output = false;
+            foreach (CustomAttributeData item in property.CustomAttributes)
+            {
+                if (item.AttributeType.Name == "ReferenceAttribute")
+                {
+                    output = true;
+                }
+            }
+            return output;
+        }
+        public static TableAttribute GetAttributeTable(this Type t)
+        {
+            return (TableAttribute)Attribute.GetCustomAttribute(t, typeof(TableAttribute));
+        }
+        public static ViewAttribute GetAttributeView(this Type t)
+        {
+            return (ViewAttribute)Attribute.GetCustomAttribute(t, typeof(ViewAttribute));
+        }
+        public static EntityAttribute GetAttributeEntity(this Model instance)
+        {
+            return (EntityAttribute)Attribute.GetCustomAttribute(instance.GetType(), typeof(EntityAttribute));
+        }
+        public static FieldsAttribute GetAttributeFields(this Type t)
+        {
+            return (FieldsAttribute)Attribute.GetCustomAttribute(t, typeof(FieldsAttribute));
+        }
     }
 }
 
